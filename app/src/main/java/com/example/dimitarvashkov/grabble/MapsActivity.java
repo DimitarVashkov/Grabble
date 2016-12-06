@@ -1,10 +1,17 @@
 package com.example.dimitarvashkov.grabble;
 
+import android.*;
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -28,10 +35,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Calendar;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback{
 
     private GoogleMap mMap;
+    //int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,15 +52,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        startDemo();
     }
 
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setMinZoomPreference(17.0f);
+        mMap.setMinZoomPreference(18.0f);
+
+        //------------ Current location button - not working----------------
+//        int permissionCheck = ContextCompat.checkSelfPermission(this,
+//                Manifest.permission.ACCESS_FINE_LOCATION);
+//        Log.d("Permission status", String.valueOf(permissionCheck));
+//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+//                == PackageManager.PERMISSION_GRANTED) {
+//            mMap.setMyLocationEnabled(true);
+//        } else {
+//            Log.d("Error", "Couldn't access location");
+//            ActivityCompat.requestPermissions(this,
+//                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+//                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+//            Log.d("Permission status:", String.valueOf(MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION));
+//            mMap.setMyLocationEnabled(true);
+//
+//            // Show rationale and request permission.
+//        }
+
+
         UiSettings settings = mMap.getUiSettings();
+
         settings.setZoomControlsEnabled(true);
+        settings.setMapToolbarEnabled(false);
+
         LatLng edi = new LatLng(55.944654198057094, -3.1881607036577027);
         Marker currentLocation = mMap.addMarker(new MarkerOptions()
                 .position(edi)
@@ -58,11 +93,86 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLng(edi));
     }
 
+    public void startDemo() {
+        try {
+            retrieveFileFromUrl();
+        } catch (Exception e) {
+            Log.e("Exception caught", e.toString());
+        }
+    }
 
 
+    private void retrieveFileFromUrl() {
+        Calendar calendar = Calendar.getInstance();
+        int day = calendar.get(Calendar.DAY_OF_WEEK);
+        switch (day) {
+            case Calendar.SUNDAY:
+                new DownloadKmlFile(getString(R.string.kml_sunday)).execute();
+                break;
+
+            case Calendar.MONDAY:
+                new DownloadKmlFile(getString(R.string.kml_monday)).execute();
+                break;
+
+            case Calendar.TUESDAY:
+                new DownloadKmlFile(getString(R.string.kml_tuesday)).execute();
+                break;
+
+            case Calendar.WEDNESDAY:
+                new DownloadKmlFile(getString(R.string.kml_wednesday)).execute();
+                break;
+
+            case Calendar.THURSDAY:
+                new DownloadKmlFile(getString(R.string.kml_thursday)).execute();
+                break;
+
+            case Calendar.FRIDAY:
+                new DownloadKmlFile(getString(R.string.kml_friday)).execute();
+                break;
+
+            case Calendar.SATURDAY:
+                new DownloadKmlFile(getString(R.string.kml_saturday)).execute();
+                break;
+        }
+
+    }
 
 
+    private class DownloadKmlFile extends AsyncTask<String, Void, byte[]> {
+        private final String mUrl;
 
+        public DownloadKmlFile(String url) {
+            mUrl = url;
+        }
 
+        protected byte[] doInBackground(String... params) {
+            try {
+                InputStream is = new URL(mUrl).openStream();
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                int nRead;
+                byte[] data = new byte[16384];
+                while ((nRead = is.read(data, 0, data.length)) != -1) {
+                    buffer.write(data, 0, nRead);
+                }
+                buffer.flush();
+                return buffer.toByteArray();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        protected void onPostExecute(byte[] byteArr) {
+            try {
+                KmlLayer kmlLayer = new KmlLayer(mMap, new ByteArrayInputStream(byteArr),
+                        getApplicationContext());
+                kmlLayer.addLayerToMap();
+            } catch (XmlPullParserException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 }

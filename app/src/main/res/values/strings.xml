@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Grabble</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="kml_url">http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/sunday.kml</string>
+</resources>

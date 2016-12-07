@@ -11,4 +11,10 @@ import android.view.ViewGroup;
 
 
 public class InventoryFragment extends Fragment {
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.inventory, container, false);
+        return rootView;
+    }
 }

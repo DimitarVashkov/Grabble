@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">Grabble</string>
     <string name="title_activity_maps">Map</string>
-<<<<<<< HEAD
     <string name="kml_sunday">http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/sunday.kml</string>
     <string name="kml_monday">http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/monday.kml</string>
     <string name="kml_tuesday">http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/tuesday.kml</string>
@@ -9,8 +8,6 @@
     <string name="kml_thursday">http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/thursday.kml</string>
     <string name="kml_friday">http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/friday.kml</string>
     <string name="kml_saturday">http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/saturday.kml</string>
-=======
-    <string name="kml_url">http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/sunday.kml</string>
 
     <string name="category_help">Help</string>
 
@@ -19,5 +16,5 @@
     <string name="category_profile">Profile</string>
 
     <string name="category_inventory">Inventory</string>
->>>>>>> add-menu-fragments
+
 </resources>

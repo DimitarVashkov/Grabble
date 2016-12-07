@@ -11,5 +11,11 @@ import android.view.ViewGroup;
 
 
 public class HelpFragment extends Fragment {
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.help, container, false);
+        return rootView;
+    }
 
 }

@@ -12,7 +12,7 @@ public class MenuActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Set the content of the activity to use the activity_main.xml layout file
-        setContentView(android.R.layout.activity_menu);
+        setContentView(R.layout.activity_menu);
 
         // Find the view pager that will allow the user to swipe between fragments
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);

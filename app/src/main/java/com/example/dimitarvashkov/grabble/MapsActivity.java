@@ -2,13 +2,17 @@ package com.example.dimitarvashkov.grabble;
 
 import android.*;
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -37,11 +41,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Calendar;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback{
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
-    //int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
-
 
 
     @Override
@@ -53,12 +55,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         startDemo();
+
+        Button combinerButton = (Button) findViewById(R.id.combiner);
+        combinerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent i = new Intent(MapsActivity.this, LetterCombinerActivity.class);
+                startActivity(i);
+            }
+        });
+        Button menuButton = (Button) findViewById(R.id.menu);
+        menuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent i = new Intent(MapsActivity.this, MenuActivity.class);
+                startActivity(i);
+            }
+        });
+
     }
 
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        googleMap.setOnMarkerClickListener(this);
         mMap.setMinZoomPreference(18.0f);
 
         //------------ Current location button - not working----------------
@@ -175,4 +198,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    @Override
+    public boolean onMarkerClick(final Marker marker) {
+        Log.e("Clicked on marked","sup");
+        return true;
+    }
 }

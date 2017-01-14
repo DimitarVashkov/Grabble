@@ -74,21 +74,30 @@
 
     </LinearLayout>
 
-    <android.support.design.widget.FloatingActionButton
+    <LinearLayout
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:padding="10dp"
-        android:layout_margin="20dp"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@android:drawable/btn_star"/>
-    <android.support.design.widget.FloatingActionButton
-        android:padding="10dp"
-        android:layout_margin="20dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@android:drawable/btn_dropdown"/>
+        android:orientation="horizontal"
+        >
+        <Button
+            android:layout_alignParentBottom="true"
+            android:layout_width="0px"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:text="Map"
+            android:background="@color/primary_color"
+            android:textColor="@color/tan_background"
+            android:id="@+id/mapButton"
+            />
+        <Button
+            android:layout_height="match_parent"
+            android:layout_width="0px"
+            android:layout_weight="1"
+            android:text="Menu"
+            android:background="@color/primary_color"
+            android:textColor="@color/tan_background"
+            android:id="@+id/menuButton"/>
+    </LinearLayout>
 
 </RelativeLayout>

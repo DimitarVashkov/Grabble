@@ -41,10 +41,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Calendar;
 
+import static android.R.attr.tag;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
-
+    private Bucket bucket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -200,7 +202,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public boolean onMarkerClick(final Marker marker) {
-        Log.e("Clicked on marked","sup");
+        marker.showInfoWindow();
+        //Letter is contained in the Snippet attribute
+         String markerLetter = (String) marker.getSnippet();
+        Letter letter = Letter.createLetter(markerLetter);
+        Log.d(letter.getLetter(),markerLetter);
+        String value = Integer.toString(letter.getValue());
+        Log.d(value,markerLetter);
+        //bucket.addToBucket(letter);
+        marker.remove();
+        //bucket.displayBucket();
         return true;
     }
+
 }

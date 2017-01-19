@@ -1,36 +1,33 @@
 package com.example.dimitarvashkov.grabble;
-
 import android.*;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.AsyncTask;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.maps.android.kml.KmlContainer;
 import com.google.maps.android.kml.KmlLayer;
-import com.google.maps.android.kml.KmlPlacemark;
-import com.google.maps.android.kml.KmlPolygon;
-
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -39,23 +36,40 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
 
-import static android.R.attr.tag;
-
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+        LocationListener  {
 
     private GoogleMap mMap;
-    private Bucket bucket;
+    private LocationRequest mLocationRequest;
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
+    private Marker marker;
+
+    private ArrayList<Letter> bucket = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
+        if (mGoogleApiClient == null || !mGoogleApiClient.isConnected()){
+
+            buildGoogleApiClient();
+            mGoogleApiClient.connect();
+
+        }
+
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
+
         startDemo();
 
         Button combinerButton = (Button) findViewById(R.id.combiner);
@@ -80,43 +94,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
+
+    //TODO add onResume, onStop
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
         mMap = googleMap;
-        googleMap.setOnMarkerClickListener(this);
-        mMap.setMinZoomPreference(18.0f);
-
-        //------------ Current location button - not working----------------
-//        int permissionCheck = ContextCompat.checkSelfPermission(this,
-//                Manifest.permission.ACCESS_FINE_LOCATION);
-//        Log.d("Permission status", String.valueOf(permissionCheck));
-//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-//                == PackageManager.PERMISSION_GRANTED) {
-//            mMap.setMyLocationEnabled(true);
-//        } else {
-//            Log.d("Error", "Couldn't access location");
-//            ActivityCompat.requestPermissions(this,
-//                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-//                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-//            Log.d("Permission status:", String.valueOf(MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION));
-//            mMap.setMyLocationEnabled(true);
-//
-//            // Show rationale and request permission.
-//        }
-
-
-        UiSettings settings = mMap.getUiSettings();
-
-        settings.setZoomControlsEnabled(true);
-        settings.setMapToolbarEnabled(false);
-
-        LatLng edi = new LatLng(55.944654198057094, -3.1881607036577027);
-        Marker currentLocation = mMap.addMarker(new MarkerOptions()
-                .position(edi)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(edi));
+        mMap.setOnMarkerClickListener(this);
+        mMap.setMinZoomPreference(21.0f);
+        //mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.getUiSettings().setScrollGesturesEnabled(false);
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED){
+        mMap.setMyLocationEnabled(true);}
+        else {
+            Log.d("Fuck", Manifest.permission.ACCESS_FINE_LOCATION);
+        }
     }
+
 
     public void startDemo() {
         try {
@@ -200,19 +196,74 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    //TODO store letters efficiently, fix buttons
     @Override
     public boolean onMarkerClick(final Marker marker) {
-        marker.showInfoWindow();
+        //marker.showInfoWindow();
         //Letter is contained in the Snippet attribute
-         String markerLetter = (String) marker.getSnippet();
+        String markerLetter = (String) marker.getSnippet();
         Letter letter = Letter.createLetter(markerLetter);
-        Log.d(letter.getLetter(),markerLetter);
-        String value = Integer.toString(letter.getValue());
-        Log.d(value,markerLetter);
-        //bucket.addToBucket(letter);
+        bucket.add(letter);
         marker.remove();
-        //bucket.displayBucket();
+
         return true;
     }
+
+    protected synchronized void buildGoogleApiClient() {
+        Toast.makeText(this, "buildGoogleApiClient", Toast.LENGTH_SHORT).show();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        Toast.makeText(this,"onConnected", Toast.LENGTH_SHORT).show();
+
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(1000);
+        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
+        //mLocationRequest.setSmallestDisplacement(0.1F);
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED){
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        }else{
+            Log.d("FUCK", android.Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
+    //TODO fix markers
+    @Override
+    public void onLocationChanged(Location location) {
+        mLastLocation = location;
+
+        //remove previous current location Marker
+        if (marker != null){
+            marker.remove();
+        }
+
+        double dLatitude = mLastLocation.getLatitude();
+        double dLongitude = mLastLocation.getLongitude();
+        marker = mMap.addMarker(new MarkerOptions().position(new LatLng(dLatitude, dLongitude))
+                .title("My Location").icon(BitmapDescriptorFactory
+                        .defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(dLatitude, dLongitude), 8));
+
+    }
+
 
 }

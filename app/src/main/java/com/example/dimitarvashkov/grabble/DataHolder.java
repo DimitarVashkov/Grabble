@@ -20,7 +20,6 @@ public class DataHolder {
         for( String i : bunchOfLetters){
             letters.remove(i);
         }
-
     }
 
     public ArrayList<String> getLetters(){

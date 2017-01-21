@@ -1,7 +1,9 @@
 package com.example.dimitarvashkov.grabble;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,10 +13,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 
@@ -36,10 +42,23 @@ public class LetterCombinerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_letter_combiner);
 
-        bucket = DataHolder.getInstance().getLetters();
-         gridView = (GridView)findViewById(R.id.letterStorage);
-        letterAdapter = new LetterAdapter(this, bucket);
-        gridView.setAdapter(letterAdapter);
+        // We need an Editor object to make preference changes.
+        // All objects are from android.context.Context
+
+           SharedPreferences sharedPrefs = getSharedPreferences("Sup",0);
+           Gson gson = new Gson();
+           String json = sharedPrefs.getString("Letters", null);
+           Type type = new TypeToken<ArrayList<String>>(){}.getType();
+
+            bucket = gson.fromJson(json, type);
+            if(bucket == null){
+                bucket = DataHolder.getInstance().getLetters();
+            }
+
+            gridView = (GridView) findViewById(R.id.letterStorage);
+            letterAdapter = new LetterAdapter(this, bucket);
+            gridView.setAdapter(letterAdapter);
+
 
         Button mapButton = (Button) findViewById(R.id.mapButton);
         createDictionary();
@@ -84,6 +103,23 @@ public class LetterCombinerActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        SharedPreferences sharedPrefs = getSharedPreferences("Sup",0);
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(DataHolder.getInstance().getLetters());
+
+        editor.putString("Letters", json);
+        editor.commit();
+    }
 
     public boolean checkWord(EditText wordEditText){
         String word = wordEditText.getText().toString();

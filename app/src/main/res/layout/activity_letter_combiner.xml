@@ -17,7 +17,8 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
         tools:context="com.example.dimitarvashkov.grabble.LetterCombinerActivity"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:gravity="center">
 
         <TextView
             android:padding="10dp"
@@ -59,36 +60,15 @@
             android:textSize="30dp"
             android:padding="10dp"/>
 
-        <LinearLayout
+
+        <GridView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_margin="10dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="M"
-                android:textSize="40dp"/>
-            <TextView
-                android:layout_margin="10dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="K"
-                android:textSize="40dp"/>
-            <TextView
-                android:layout_margin="10dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="F"
-                android:textSize="40dp"/>
-            <TextView
-                android:layout_margin="10dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="S"
-                android:textSize="40dp"/>
+            android:id="@+id/letterStorage"
+            android:numColumns="6"
+            android:layout_gravity="center"
+            android:gravity="center"/>
 
-        </LinearLayout>
 
 
     </LinearLayout>

@@ -6,8 +6,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,18 +17,30 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+
 public class LetterCombinerActivity extends AppCompatActivity {
 
     private InputStream input;
     private BufferedReader reader;
     private String line;
     private ArrayList<String> dictionary;
+    private GridView gridView;
+    private ArrayAdapter<String> storage;
+    private LetterAdapter letterAdapter;
+    private ArrayList<String> bucket;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_letter_combiner);
+
+        bucket = DataHolder.getInstance().getLetters();
+         gridView = (GridView)findViewById(R.id.letterStorage);
+        letterAdapter = new LetterAdapter(this, bucket);
+        gridView.setAdapter(letterAdapter);
+
         Button mapButton = (Button) findViewById(R.id.mapButton);
         createDictionary();
         mapButton.setOnClickListener(new View.OnClickListener() {
@@ -66,6 +80,8 @@ public class LetterCombinerActivity extends AppCompatActivity {
 
             }
         });
+
+
     }
 
 

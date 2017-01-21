@@ -10,7 +10,9 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -47,8 +49,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
     private Marker marker;
+    private GridView gridView;
+    private ArrayAdapter<String> storage;
 
-    private ArrayList<Letter> bucket = new ArrayList<>();
+    //TODO change letter collection to Strings
+    private ArrayList<String> bucket = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +74,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
+        //TODO clean up the code
+//        try {
+//            gridView = (GridView) findViewById(R.id.letterStorage);
+//            bucket.add("Basic");
+//            bucket.add("A");
+//            storage = new ArrayAdapter<>(this, android.R.layout.simple_list_item_2, bucket);
+//            gridView.setAdapter(storage);
+//        }catch (NullPointerException e){
+//            Log.e("FUCK","Empty adapter",e);
+//        }
 
         startDemo();
 
@@ -202,8 +217,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //marker.showInfoWindow();
         //Letter is contained in the Snippet attribute
         String markerLetter = (String) marker.getSnippet();
-        Letter letter = Letter.createLetter(markerLetter);
-        bucket.add(letter);
+        //Letter letter = Letter.createLetter(markerLetter);
+        //bucket.add(markerLetter);
+        DataHolder.getInstance().addLetter(markerLetter);
+
         marker.remove();
 
         return true;

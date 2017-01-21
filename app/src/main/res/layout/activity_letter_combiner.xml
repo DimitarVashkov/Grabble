@@ -25,13 +25,32 @@
             android:layout_height="wrap_content"
             android:text="Write your 7-letter word below:"
             android:textSize="30dp"/>
-        <EditText
-            android:padding="10dp"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="word"
-            android:textSize="40dp"
-            android:layout_gravity="center_horizontal"/>
+            android:weightSum="1.0">
+            <EditText
+                android:padding="10dp"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:hint="AddWord"
+                android:textSize="40dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_weight="0.7"
+                android:id="@+id/wordCombiner"
+                android:inputType="textNoSuggestions"
+                android:imeOptions="actionDone"/>
+            <Button
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:layout_gravity="center"
+                android:text="SUBMIT"
+                android:textColor="@color/tan_background"
+                android:background="@color/primary_color"
+                android:id="@+id/submit"/>
+        </LinearLayout>
+
 
         <TextView
             android:layout_width="match_parent"

@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -43,7 +44,13 @@ public class InventoryFragment extends Fragment {
         gridView = (GridView) rootView.findViewById(R.id.letterStorage);
         letterAdapter = new LetterAdapter(getActivity(), bucket);
         gridView.setAdapter(letterAdapter);
+
+
+        TextView lettersCollected = (TextView) rootView.findViewById(R.id.lettersCollected);
+        lettersCollected.setText(Integer.toString(bucket.size()));
+
         return rootView;
+
     }
 
     @Override

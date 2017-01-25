@@ -10,6 +10,7 @@ import java.util.HashMap;
 public class DataHolder {
     private ArrayList<String> letters = new ArrayList<>();
     private int score;
+    private int wordsCreated;
 
     private HashMap<String,Integer> values = new HashMap<>();
 
@@ -65,5 +66,13 @@ public class DataHolder {
     }
     public void addToScore(int i){
         score += i;
+    }
+
+    public void createdWord(){
+        wordsCreated++;
+    }
+
+    public int getWordsCreated(){
+        return wordsCreated;
     }
 }

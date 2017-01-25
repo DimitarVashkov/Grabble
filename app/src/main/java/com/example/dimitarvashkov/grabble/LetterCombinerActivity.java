@@ -162,10 +162,11 @@ public class LetterCombinerActivity extends AppCompatActivity {
                 }
 
                 DataHolder.getInstance().removeLetter(letter);
+
             }
 
 
-
+            DataHolder.getInstance().createdWord();
             Toast.makeText(this,Integer.toString(DataHolder.getInstance().getScore()),Toast.LENGTH_SHORT).show();
             return true;
         }

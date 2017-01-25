@@ -30,13 +30,9 @@ public class InventoryFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.inventory, container, false);
 
-        SharedPreferences sharedPrefs = this.getActivity().getSharedPreferences("Sup",0);
-        Gson gson = new Gson();
-        String json = sharedPrefs.getString("Letters", null);
-        Type type = new TypeToken<ArrayList<String>>(){}.getType();
-
-        bucket = gson.fromJson(json, type);
-        if(bucket == null){
+        if(DataHolder.getInstance().getLetters() == null){
+            bucket = new ArrayList<>();
+        }else {
             bucket = DataHolder.getInstance().getLetters();
         }
 
@@ -56,13 +52,6 @@ public class InventoryFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        SharedPreferences sharedPrefs = this.getActivity().getSharedPreferences("Sup",0);
-        SharedPreferences.Editor editor = sharedPrefs.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(DataHolder.getInstance().getLetters());
-
-        editor.putString("Letters", json);
-        editor.commit();
-
+        
     }
 }

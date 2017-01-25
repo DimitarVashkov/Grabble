@@ -8,7 +8,7 @@ import java.util.HashMap;
  */
 
 public class DataHolder {
-    private ArrayList<String> letters = new ArrayList<>();
+    private ArrayList<String> letters;
     private int score;
     private int wordsCreated;
 
@@ -18,6 +18,10 @@ public class DataHolder {
     public static DataHolder getInstance() {return holder;}
 
     public void addLetter(String letter){
+        if(letters == null){
+            letters = new ArrayList<>();
+        }
+
         letters.add(letter);
     }
 
@@ -68,11 +72,17 @@ public class DataHolder {
         score += i;
     }
 
-    public void createdWord(){
-        wordsCreated++;
+    public void createdWords(int i){
+        wordsCreated += i;
     }
 
     public int getWordsCreated(){
         return wordsCreated;
     }
+
+    public void insertLetterSet(ArrayList<String> lettersFromPreviousSession){
+        letters = lettersFromPreviousSession;
+    }
+
+
 }

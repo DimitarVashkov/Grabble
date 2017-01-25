@@ -48,15 +48,12 @@ public class LetterCombinerActivity extends AppCompatActivity {
         // We need an Editor object to make preference changes.
         // All objects are from android.context.Context
 
-           SharedPreferences sharedPrefs = getSharedPreferences("Sup",0);
-           Gson gson = new Gson();
-           String json = sharedPrefs.getString("Letters", null);
-           Type type = new TypeToken<ArrayList<String>>(){}.getType();
-
-            bucket = gson.fromJson(json, type);
-            if(bucket == null){
+            if(DataHolder.getInstance().getLetters() == null){
+                bucket = new ArrayList<>();
+            }else {
                 bucket = DataHolder.getInstance().getLetters();
             }
+
 
             gridView = (GridView) findViewById(R.id.letterStorage);
             letterAdapter = new LetterAdapter(this, bucket);
@@ -121,7 +118,14 @@ public class LetterCombinerActivity extends AppCompatActivity {
         String json = gson.toJson(DataHolder.getInstance().getLetters());
 
         editor.putString("Letters", json);
+        editor.putInt("Words",DataHolder.getInstance().getWordsCreated());
+        editor.putInt("Score",DataHolder.getInstance().getScore());
+
+
         editor.commit();
+
+
+
     }
 
     public boolean checkWord(EditText wordEditText){
@@ -166,7 +170,7 @@ public class LetterCombinerActivity extends AppCompatActivity {
             }
 
 
-            DataHolder.getInstance().createdWord();
+            DataHolder.getInstance().createdWords(1);
             Toast.makeText(this,Integer.toString(DataHolder.getInstance().getScore()),Toast.LENGTH_SHORT).show();
             return true;
         }

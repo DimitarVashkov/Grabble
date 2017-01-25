@@ -74,16 +74,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        //TODO clean up the code
-//        try {
-//            gridView = (GridView) findViewById(R.id.letterStorage);
-//            bucket.add("Basic");
-//            bucket.add("A");
-//            storage = new ArrayAdapter<>(this, android.R.layout.simple_list_item_2, bucket);
-//            gridView.setAdapter(storage);
-//        }catch (NullPointerException e){
-//            Log.e("FUCK","Empty adapter",e);
-//        }
 
         startDemo();
 
@@ -219,7 +209,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String markerLetter = (String) marker.getSnippet();
         //Letter letter = Letter.createLetter(markerLetter);
         //bucket.add(markerLetter);
-        DataHolder.getInstance().addLetter(markerLetter);
+        DataHolder.getInstance().addLetter(markerLetter.toUpperCase());
+        //TODO Collect marker IDS
 
         marker.remove();
 
@@ -277,7 +268,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         double dLongitude = mLastLocation.getLongitude();
         marker = mMap.addMarker(new MarkerOptions().position(new LatLng(dLatitude, dLongitude))
                 .title("My Location").icon(BitmapDescriptorFactory
-                        .defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                        .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(dLatitude, dLongitude), 8));
 
     }

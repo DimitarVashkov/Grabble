@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -22,6 +23,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class LetterCombinerActivity extends AppCompatActivity {
@@ -83,7 +86,7 @@ public class LetterCombinerActivity extends AppCompatActivity {
 
         final EditText wordEditText = (EditText) findViewById(R.id.wordCombiner);
 
-        //TODO add a reader for the Grabble dictionary
+
         final Button submitButton = (Button) findViewById(R.id.submit);
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,10 +125,52 @@ public class LetterCombinerActivity extends AppCompatActivity {
     }
 
     public boolean checkWord(EditText wordEditText){
-        String word = wordEditText.getText().toString();
-        if (word.length() == 7 && dictionary.contains(word)){
+        String word = wordEditText.getText().toString().toUpperCase();
+        ArrayList<String> letters =  DataHolder.getInstance().getLetters();
+
+        Toast.makeText(this,Integer.toString(letters.size()),Toast.LENGTH_SHORT).show();
+        boolean hasLetters = true;
+
+        for(int i=0; i<word.length();i++){
+            if(!letters.contains(Character.toString(word.charAt(i)))){
+                hasLetters = false;
+            }
+        }
+
+        if(!hasLetters){
+            Toast.makeText(this,"No letters",Toast.LENGTH_SHORT).show();
+        }
+        if(word.length() != 7){
+            Toast.makeText(this,"Not 7 letters long",Toast.LENGTH_SHORT).show();
+        }
+        if(!dictionary.contains(word)){
+            Toast.makeText(this,"Word not in dictionary",Toast.LENGTH_SHORT).show();
+
+        }
+
+        //TODO count letter score
+        HashMap<String,Integer> values = DataHolder.getInstance().getValues();
+
+
+        if (hasLetters && word.length() == 7 && dictionary.contains(word)){
+            for(int i=0; i<word.length();i++){
+                String letter = Character.toString(word.charAt(i));
+
+                if (values.containsKey(letter)){
+                    int number = values.get(letter);
+                    DataHolder.getInstance().addToScore(number);
+                }
+
+                DataHolder.getInstance().removeLetter(letter);
+            }
+
+
+
+            Toast.makeText(this,Integer.toString(DataHolder.getInstance().getScore()),Toast.LENGTH_SHORT).show();
             return true;
         }
+
+
         return false;
     }
 
@@ -134,11 +179,10 @@ public class LetterCombinerActivity extends AppCompatActivity {
         dictionary = new ArrayList<>();
         input = getResources().openRawResource(R.raw.grabble);
         reader = new BufferedReader(new InputStreamReader(input));
-
         try {
             String fileLine;
             while((fileLine =reader.readLine()) != null){
-                dictionary.add(fileLine);
+                dictionary.add(fileLine.toUpperCase());
             }
 
             reader.close();
@@ -154,6 +198,7 @@ public class LetterCombinerActivity extends AppCompatActivity {
         return dictionary;
 
     }
+
 
 
 }

@@ -22,6 +22,8 @@ public class InventoryFragment extends Fragment {
     private ArrayList<String> bucket;
     private GridView gridView;
     private LetterAdapter letterAdapter;
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

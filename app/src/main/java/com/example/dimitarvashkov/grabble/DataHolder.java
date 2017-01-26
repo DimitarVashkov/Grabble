@@ -11,6 +11,7 @@ public class DataHolder {
     private ArrayList<String> letters;
     private int score;
     private int wordsCreated;
+    private boolean vibrate = false;
 
     private HashMap<String,Integer> values = new HashMap<>();
 
@@ -84,5 +85,12 @@ public class DataHolder {
         letters = lettersFromPreviousSession;
     }
 
+    public void setVibrate(boolean b){
+        vibrate = b;
+    }
+
+    public boolean getVibrate(){
+        return vibrate;
+    }
 
 }

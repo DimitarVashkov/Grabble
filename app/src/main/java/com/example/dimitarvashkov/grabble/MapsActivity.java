@@ -1,4 +1,5 @@
 package com.example.dimitarvashkov.grabble;
+
 import android.*;
 import android.Manifest;
 import android.content.Context;
@@ -16,6 +17,7 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
@@ -63,8 +65,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        LocationListener  {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+        LocationListener {
 
     private GoogleMap mMap;
     private LocationRequest mLocationRequest;
@@ -75,14 +77,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Circle circle;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
 
-        if (mGoogleApiClient == null || !mGoogleApiClient.isConnected()){
+
+        if (mGoogleApiClient == null || !mGoogleApiClient.isConnected()) {
 
             buildGoogleApiClient();
             mGoogleApiClient.connect();
@@ -121,19 +123,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
 
-//        final Switch vibrateSwitch = (Switch) findViewById(R.id.vibrate);
-//        vibrateSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-//                if(isChecked){
-//                  vibrate = true;
-//                }
-//            }
-//        });
+
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+    @Override
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+
+        if(mLastLocation != null){
+            SharedPreferences sharedPreferences = getSharedPreferences("Sup",0);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putLong("Latitude", Double.doubleToLongBits(mLastLocation.getLatitude()));
+        editor.putLong("Longitude", Double.doubleToLongBits(mLastLocation.getLongitude()));
+        editor.commit();}
+
+        super.onStop();
+
+    }
 
     //TODO add onResume, onStop
     @Override
@@ -146,32 +162,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.getUiSettings().setScrollGesturesEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
 
+        SharedPreferences sharedPreferences = getSharedPreferences("Sup",0);
+        double latitude = Double.longBitsToDouble(sharedPreferences.getLong("Latitude", 0));
+        double longitude = Double.longBitsToDouble(sharedPreferences.getLong("Longitude", 0));
+        Location loc = new Location("");
 
-        LocationManager locManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-        Location location;
-
-        location = locManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            if(location!=null){
-                Double longitude = location.getLongitude();
-                Double latitude = location.getLatitude();
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 8));
-            }
-
+        if(latitude ==0 && longitude ==0){
+            loc.setLatitude(55.02);
+            loc.setLongitude(-3.96);
+            onLocationChanged(loc);
+        }else{
+            loc.setLatitude(latitude);
+            loc.setLongitude(longitude);
+            onLocationChanged(loc);
+        }
 
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED){
         mMap.setMyLocationEnabled(true);}
         else {
-            Log.d("Fuck", Manifest.permission.ACCESS_FINE_LOCATION);
+            Log.d("No access", Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
 
-    }
 
     public void startDemo() {
         if(isNetworkAvailable()) {
@@ -265,10 +280,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //TODO store letters efficiently, fix buttons
     @Override
     public boolean onMarkerClick(final Marker marker) {
-//        if(vibrate){
-//            Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-//            v.vibrate(500);
-//        }
+
         //marker.showInfoWindow();
         //Letter is contained in the Snippet attribute
 
@@ -280,6 +292,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if( distance[0] > circle.getRadius()  ){
             marker.showInfoWindow();
             Toast.makeText(getBaseContext(), "Get closer to the Marker Location", Toast.LENGTH_LONG).show();
+            if(DataHolder.getInstance().getVibrate()){
+                Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+                v.vibrate(500);
+            }
 
         } else {
             String markerLetter = (String) marker.getSnippet();
@@ -351,6 +367,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         marker = mMap.addMarker(new MarkerOptions().position(new LatLng(dLatitude, dLongitude))
                 .title("My Location").icon(BitmapDescriptorFactory
                         .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+        //marker.setVisible(false);
+        //Marker visibility used for debugging purposes
+
+
         if(circle!= null){
             circle.remove();
         }

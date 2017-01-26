@@ -22,7 +22,15 @@ public class SettingsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.settings, container, false);
 
-
+        final Switch vibrateSwitch = (Switch) rootView.findViewById(R.id.vibrate);
+        vibrateSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if(isChecked){
+                    DataHolder.getInstance().setVibrate(isChecked);
+                }
+            }
+        });
 
         return rootView;
     }

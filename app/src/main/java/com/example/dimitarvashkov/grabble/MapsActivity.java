@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -37,6 +39,8 @@ import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -56,6 +60,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
@@ -67,6 +72,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Location mLastLocation;
     private Marker marker;
     private Set<String> markerIDs = new HashSet<>();
+    private Circle circle;
 
 
 
@@ -139,6 +145,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setScrollGesturesEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
+
+
+        LocationManager locManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        Location location;
+
+        location = locManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            if(location!=null){
+                Double longitude = location.getLongitude();
+                Double latitude = location.getLatitude();
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 8));
+            }
+
+
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED){
@@ -252,15 +271,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        }
         //marker.showInfoWindow();
         //Letter is contained in the Snippet attribute
-        String markerLetter = (String) marker.getSnippet();
-        //Letter letter = Letter.createLetter(markerLetter);
-        //bucket.add(markerLetter);
-        DataHolder.getInstance().addLetter(markerLetter.toUpperCase());
-        //TODO Collect marker IDS
-        String markerID = (String) marker.getId();
-        markerIDs.add(markerID);
 
-        marker.remove();
+        float[] distance = new float[2];
+
+        Location.distanceBetween( marker.getPosition().latitude, marker.getPosition().longitude,
+                circle.getCenter().latitude, circle.getCenter().longitude, distance);
+
+        if( distance[0] > circle.getRadius()  ){
+            marker.showInfoWindow();
+            Toast.makeText(getBaseContext(), "Get closer to the Marker Location", Toast.LENGTH_LONG).show();
+
+        } else {
+            String markerLetter = (String) marker.getSnippet();
+            //Letter letter = Letter.createLetter(markerLetter);
+            //bucket.add(markerLetter);
+            DataHolder.getInstance().addLetter(markerLetter.toUpperCase());
+            //TODO Collect marker IDS
+            String markerID = (String) marker.getId();
+            markerIDs.add(markerID);
+
+            marker.remove();
+            Toast.makeText(getBaseContext(), "Letter collected!", Toast.LENGTH_LONG).show();
+        }
+
+
 
         return true;
     }
@@ -317,6 +351,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         marker = mMap.addMarker(new MarkerOptions().position(new LatLng(dLatitude, dLongitude))
                 .title("My Location").icon(BitmapDescriptorFactory
                         .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+        if(circle!= null){
+            circle.remove();
+        }
+        circle = mMap.addCircle(new CircleOptions()
+                .center(marker.getPosition())
+                .radius(5)
+                .strokeColor(Color.RED)
+                .fillColor(Color.TRANSPARENT));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(dLatitude, dLongitude), 8));
 
     }

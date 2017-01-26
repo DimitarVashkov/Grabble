@@ -121,9 +121,7 @@ public class LetterCombinerActivity extends AppCompatActivity {
         editor.putInt("Words",DataHolder.getInstance().getWordsCreated());
         editor.putInt("Score",DataHolder.getInstance().getScore());
 
-
         editor.commit();
-
 
 
     }

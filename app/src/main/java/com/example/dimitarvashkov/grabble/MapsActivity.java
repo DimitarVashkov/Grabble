@@ -1,18 +1,24 @@
 package com.example.dimitarvashkov.grabble;
 import android.*;
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Vibrator;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.GridView;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -29,7 +35,9 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.kml.KmlContainer;
 import com.google.maps.android.kml.KmlLayer;
+import com.google.maps.android.kml.KmlPlacemark;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -40,6 +48,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         LocationListener  {
@@ -49,11 +61,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
     private Marker marker;
-    private GridView gridView;
-    private ArrayAdapter<String> storage;
+    private Set<String> markerIDs = new HashSet<>();
+    private boolean vibrate = false;
 
-    //TODO change letter collection to Strings
-    private ArrayList<String> bucket = new ArrayList<>();
 
 
     @Override
@@ -68,7 +78,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mGoogleApiClient.connect();
 
         }
-
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -96,6 +105,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+
+        final Switch vibrateSwitch = (Switch) findViewById(R.id.vibrate);
+        vibrateSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if(isChecked){
+                  vibrate = true;
+                }
+            }
+        });
+
     }
 
 
@@ -118,6 +138,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+    }
 
     public void startDemo() {
         try {
@@ -190,9 +215,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         protected void onPostExecute(byte[] byteArr) {
             try {
+
                 KmlLayer kmlLayer = new KmlLayer(mMap, new ByteArrayInputStream(byteArr),
                         getApplicationContext());
                 kmlLayer.addLayerToMap();
+
             } catch (XmlPullParserException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -204,6 +231,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //TODO store letters efficiently, fix buttons
     @Override
     public boolean onMarkerClick(final Marker marker) {
+        if(vibrate){
+            Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+            v.vibrate(500);
+        }
         //marker.showInfoWindow();
         //Letter is contained in the Snippet attribute
         String markerLetter = (String) marker.getSnippet();
@@ -211,6 +242,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //bucket.add(markerLetter);
         DataHolder.getInstance().addLetter(markerLetter.toUpperCase());
         //TODO Collect marker IDS
+        String markerID = (String) marker.getId();
+        markerIDs.add(markerID);
 
         marker.remove();
 
@@ -253,7 +286,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
     }
-
+    
     //TODO fix markers
     @Override
     public void onLocationChanged(Location location) {

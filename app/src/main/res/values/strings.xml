@@ -17,4 +17,10 @@
 
     <string name="category_inventory">Inventory</string>
 
+    <string-array name="themes">
+        <item>Wooden</item>
+        <item>Red</item>
+        <item>Blue</item>
+    </string-array>
+
 </resources>

@@ -14,6 +14,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         DataHolder.getInstance().createdWords(sharedPrefs.getInt("Words",0));
 
         DataHolder.getInstance().addToScore(sharedPrefs.getInt("Score",0));
+
 
         FloatingActionButton start = (FloatingActionButton) findViewById(R.id.start_button);
         start.setOnClickListener(new View.OnClickListener() {

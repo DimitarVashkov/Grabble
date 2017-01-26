@@ -6,12 +6,17 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -62,7 +67,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Location mLastLocation;
     private Marker marker;
     private Set<String> markerIDs = new HashSet<>();
-    private boolean vibrate = false;
 
 
 
@@ -82,6 +86,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
+        if(!(isLocationEnabled(this))){
+            Toast.makeText(this,"PLEASE ENABLE LOCATION SERVICES",Toast.LENGTH_LONG).show();
+        }
 
 
         startDemo();
@@ -106,15 +115,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
 
-        final Switch vibrateSwitch = (Switch) findViewById(R.id.vibrate);
-        vibrateSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                if(isChecked){
-                  vibrate = true;
-                }
-            }
-        });
+//        final Switch vibrateSwitch = (Switch) findViewById(R.id.vibrate);
+//        vibrateSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+//                if(isChecked){
+//                  vibrate = true;
+//                }
+//            }
+//        });
 
     }
 
@@ -130,6 +139,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setScrollGesturesEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
+
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED){
         mMap.setMyLocationEnabled(true);}
@@ -145,10 +155,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void startDemo() {
-        try {
-            retrieveFileFromUrl();
-        } catch (Exception e) {
-            Log.e("Exception caught", e.toString());
+        if(isNetworkAvailable()) {
+            try {
+                retrieveFileFromUrl();
+            } catch (Exception e) {
+                Log.e("Exception caught", e.toString());
+            }
+        }
+        else{
+            Toast.makeText(this,"NO INTERNET CONNECTION",Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -231,10 +246,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //TODO store letters efficiently, fix buttons
     @Override
     public boolean onMarkerClick(final Marker marker) {
-        if(vibrate){
-            Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-            v.vibrate(500);
-        }
+//        if(vibrate){
+//            Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+//            v.vibrate(500);
+//        }
         //marker.showInfoWindow();
         //Letter is contained in the Snippet attribute
         String markerLetter = (String) marker.getSnippet();
@@ -251,7 +266,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     protected synchronized void buildGoogleApiClient() {
-        Toast.makeText(this, "buildGoogleApiClient", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "buildGoogleApiClient", Toast.LENGTH_SHORT).show();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -261,7 +276,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onConnected(Bundle bundle) {
-        Toast.makeText(this,"onConnected", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this,"onConnected", Toast.LENGTH_SHORT).show();
 
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(1000);
@@ -273,7 +288,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 == PackageManager.PERMISSION_GRANTED){
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }else{
-            Log.d("FUCK", android.Manifest.permission.ACCESS_FINE_LOCATION);
+            Toast.makeText(this,"ENABLE LOCATION",Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -286,7 +301,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
     }
-    
+
     //TODO fix markers
     @Override
     public void onLocationChanged(Location location) {
@@ -303,6 +318,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .title("My Location").icon(BitmapDescriptorFactory
                         .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(dLatitude, dLongitude), 8));
+
+    }
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    public static boolean isLocationEnabled(Context context) {
+        int locationMode = 0;
+        String locationProviders;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            try {
+                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+
+            } catch (Settings.SettingNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+
+        }else{
+            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !TextUtils.isEmpty(locationProviders);
+        }
+
 
     }
 

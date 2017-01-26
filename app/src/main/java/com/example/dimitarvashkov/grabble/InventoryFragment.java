@@ -1,6 +1,7 @@
 package com.example.dimitarvashkov.grabble;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -44,6 +46,17 @@ public class InventoryFragment extends Fragment {
 
         TextView lettersCollected = (TextView) rootView.findViewById(R.id.lettersCollected);
         lettersCollected.setText(Integer.toString(bucket.size()));
+
+
+        Button dropper = (Button) rootView.findViewById(R.id.dropLetters);
+        dropper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                for(int i=0;i<10;i++){
+                    bucket.remove(i);
+                }
+            }
+        });
 
         return rootView;
 

@@ -1,23 +1,16 @@
 package com.example.dimitarvashkov.grabble;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 
@@ -32,9 +25,9 @@ public class InventoryFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.inventory, container, false);
 
-        if(DataHolder.getInstance().getLetters() == null){
+        if (DataHolder.getInstance().getLetters() == null) {
             bucket = new ArrayList<>();
-        }else {
+        } else {
             bucket = DataHolder.getInstance().getLetters();
         }
 
@@ -44,7 +37,7 @@ public class InventoryFragment extends Fragment {
         gridView.setAdapter(letterAdapter);
 
 
-        TextView lettersCollected = (TextView) rootView.findViewById(R.id.lettersCollected);
+        final TextView lettersCollected = (TextView) rootView.findViewById(R.id.lettersCollected);
         lettersCollected.setText(Integer.toString(bucket.size()));
 
 
@@ -52,8 +45,14 @@ public class InventoryFragment extends Fragment {
         dropper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for(int i=0;i<10;i++){
-                    bucket.remove(i);
+                bucket = DataHolder.getInstance().getLetters();
+                Log.d("Size", Integer.toString(bucket.size()));
+                if (bucket.size() > 10) {
+                    DataHolder.getInstance().removeALetter();
+                    letterAdapter.notifyDataSetChanged();
+                    lettersCollected.setText(Integer.toString(bucket.size()));
+                } else {
+                    Toast.makeText(getContext(), "You need at least 11 letters", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -65,6 +64,7 @@ public class InventoryFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
+
 
     }
 }

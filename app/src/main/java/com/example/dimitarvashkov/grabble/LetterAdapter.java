@@ -41,7 +41,7 @@ public class LetterAdapter extends BaseAdapter {
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         TextView dummyTextView = new TextView(mContext);
-        dummyTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP,22.f);
+        dummyTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 22.f);
         dummyTextView.setTypeface(null, Typeface.BOLD);
         dummyTextView.setTextColor(0xAA765f49);
         dummyTextView.setText(letters.get(i));

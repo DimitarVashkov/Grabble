@@ -1,6 +1,5 @@
 package com.example.dimitarvashkov.grabble;
 
-import android.*;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
@@ -8,7 +7,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -16,18 +14,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.GridView;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -37,7 +29,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -46,9 +37,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.maps.android.kml.KmlContainer;
 import com.google.maps.android.kml.KmlLayer;
-import com.google.maps.android.kml.KmlPlacemark;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -57,12 +46,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
@@ -76,6 +61,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Set<String> markerIDs = new HashSet<>();
     private Circle circle;
 
+    public static boolean isLocationEnabled(Context context) {
+        int locationMode = 0;
+        String locationProviders;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            try {
+                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+
+            } catch (Settings.SettingNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+
+        } else {
+            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !TextUtils.isEmpty(locationProviders);
+        }
+
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,8 +103,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
 
-        if(!(isLocationEnabled(this))){
-            Toast.makeText(this,"PLEASE ENABLE LOCATION SERVICES",Toast.LENGTH_LONG).show();
+        if (!(isLocationEnabled(this))) {
+            Toast.makeText(this, "PLEASE ENABLE LOCATION SERVICES", Toast.LENGTH_LONG).show();
         }
 
 
@@ -123,8 +130,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
 
-
-
     }
 
     @Override
@@ -136,16 +141,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mGoogleApiClient.connect();
         super.onStart();
     }
+
     @Override
     protected void onStop() {
         mGoogleApiClient.disconnect();
 
-        if(mLastLocation != null){
-            SharedPreferences sharedPreferences = getSharedPreferences("Sup",0);
+        if (mLastLocation != null) {
+            SharedPreferences sharedPreferences = getSharedPreferences("Sup", 0);
             SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putLong("Latitude", Double.doubleToLongBits(mLastLocation.getLatitude()));
-        editor.putLong("Longitude", Double.doubleToLongBits(mLastLocation.getLongitude()));
-        editor.commit();}
+            editor.putLong("Latitude", Double.doubleToLongBits(mLastLocation.getLatitude()));
+            editor.putLong("Longitude", Double.doubleToLongBits(mLastLocation.getLongitude()));
+            editor.commit();
+        }
 
         super.onStop();
 
@@ -157,21 +164,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap = googleMap;
         mMap.setOnMarkerClickListener(this);
-        mMap.setMinZoomPreference(21.0f);
-        //mMap.getUiSettings().setZoomControlsEnabled(true);
-        mMap.getUiSettings().setScrollGesturesEnabled(false);
+        mMap.setMinZoomPreference(18.0f);
+        mMap.getUiSettings().setZoomControlsEnabled(true);
+        //mMap.getUiSettings().setScrollGesturesEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("Sup",0);
+        SharedPreferences sharedPreferences = getSharedPreferences("Sup", 0);
         double latitude = Double.longBitsToDouble(sharedPreferences.getLong("Latitude", 0));
         double longitude = Double.longBitsToDouble(sharedPreferences.getLong("Longitude", 0));
         Location loc = new Location("");
 
-        if(latitude ==0 && longitude ==0){
+        if (latitude == 0 && longitude == 0) {
             loc.setLatitude(55.02);
             loc.setLongitude(-3.96);
             onLocationChanged(loc);
-        }else{
+        } else {
             loc.setLatitude(latitude);
             loc.setLongitude(longitude);
             onLocationChanged(loc);
@@ -179,28 +186,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED){
-        mMap.setMyLocationEnabled(true);}
-        else {
+                == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+        } else {
             Log.d("No access", Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
 
-
-
     public void startDemo() {
-        if(isNetworkAvailable()) {
+        if (isNetworkAvailable()) {
             try {
                 retrieveFileFromUrl();
             } catch (Exception e) {
                 Log.e("Exception caught", e.toString());
             }
-        }
-        else{
-            Toast.makeText(this,"NO INTERNET CONNECTION",Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "NO INTERNET CONNECTION", Toast.LENGTH_SHORT).show();
         }
     }
-
 
     private void retrieveFileFromUrl() {
         Calendar calendar = Calendar.getInstance();
@@ -237,6 +240,117 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    //TODO store letters efficiently, fix buttons
+    @Override
+    public boolean onMarkerClick(final Marker marker) {
+
+        //marker.showInfoWindow();
+        //Letter is contained in the Snippet attribute
+
+        float[] distance = new float[2];
+
+        Location.distanceBetween(marker.getPosition().latitude, marker.getPosition().longitude,
+                circle.getCenter().latitude, circle.getCenter().longitude, distance);
+
+        if (distance[0] > circle.getRadius()) {
+            marker.showInfoWindow();
+            Toast.makeText(getBaseContext(), "Get closer to the Marker Location", Toast.LENGTH_LONG).show();
+            if (DataHolder.getInstance().getVibrate()) {
+                Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+                v.vibrate(500);
+            }
+
+        } else {
+            String markerLetter = (String) marker.getSnippet();
+            //Letter letter = Letter.createLetter(markerLetter);
+            //bucket.add(markerLetter);
+            DataHolder.getInstance().addLetter(markerLetter.toUpperCase());
+            //TODO Collect marker IDS
+            String markerID = (String) marker.getId();
+            markerIDs.add(markerID);
+
+            marker.remove();
+            Toast.makeText(getBaseContext(), "Letter collected!", Toast.LENGTH_LONG).show();
+        }
+
+
+        return true;
+    }
+
+    protected synchronized void buildGoogleApiClient() {
+        //Toast.makeText(this, "buildGoogleApiClient", Toast.LENGTH_SHORT).show();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        //Toast.makeText(this,"onConnected", Toast.LENGTH_SHORT).show();
+
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(1000);
+        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
+        //mLocationRequest.setSmallestDisplacement(0.1F);
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        } else {
+            Toast.makeText(this, "ENABLE LOCATION", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
+    //TODO fix markers
+    @Override
+    public void onLocationChanged(Location location) {
+        mLastLocation = location;
+
+        //remove previous current location Marker
+        if (marker != null) {
+            marker.remove();
+        }
+
+        double dLatitude = mLastLocation.getLatitude();
+        double dLongitude = mLastLocation.getLongitude();
+        marker = mMap.addMarker(new MarkerOptions().position(new LatLng(dLatitude, dLongitude))
+                .title("My Location").icon(BitmapDescriptorFactory
+                        .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+        //marker.setVisible(false);
+        //Marker visibility used for debugging purposes
+
+
+        if (circle != null) {
+            circle.remove();
+        }
+        circle = mMap.addCircle(new CircleOptions()
+                .center(marker.getPosition())
+                .radius(6)
+                .strokeColor(Color.RED)
+                .fillColor(Color.TRANSPARENT));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(dLatitude, dLongitude), 8));
+
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
 
     private class DownloadKmlFile extends AsyncTask<String, Void, byte[]> {
         private final String mUrl;
@@ -275,141 +389,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 e.printStackTrace();
             }
         }
-    }
-
-    //TODO store letters efficiently, fix buttons
-    @Override
-    public boolean onMarkerClick(final Marker marker) {
-
-        //marker.showInfoWindow();
-        //Letter is contained in the Snippet attribute
-
-        float[] distance = new float[2];
-
-        Location.distanceBetween( marker.getPosition().latitude, marker.getPosition().longitude,
-                circle.getCenter().latitude, circle.getCenter().longitude, distance);
-
-        if( distance[0] > circle.getRadius()  ){
-            marker.showInfoWindow();
-            Toast.makeText(getBaseContext(), "Get closer to the Marker Location", Toast.LENGTH_LONG).show();
-            if(DataHolder.getInstance().getVibrate()){
-                Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-                v.vibrate(500);
-            }
-
-        } else {
-            String markerLetter = (String) marker.getSnippet();
-            //Letter letter = Letter.createLetter(markerLetter);
-            //bucket.add(markerLetter);
-            DataHolder.getInstance().addLetter(markerLetter.toUpperCase());
-            //TODO Collect marker IDS
-            String markerID = (String) marker.getId();
-            markerIDs.add(markerID);
-
-            marker.remove();
-            Toast.makeText(getBaseContext(), "Letter collected!", Toast.LENGTH_LONG).show();
-        }
-
-
-
-        return true;
-    }
-
-    protected synchronized void buildGoogleApiClient() {
-        //Toast.makeText(this, "buildGoogleApiClient", Toast.LENGTH_SHORT).show();
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        //Toast.makeText(this,"onConnected", Toast.LENGTH_SHORT).show();
-
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(1000);
-        mLocationRequest.setFastestInterval(1000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-
-        //mLocationRequest.setSmallestDisplacement(0.1F);
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED){
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        }else{
-            Toast.makeText(this,"ENABLE LOCATION",Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-
-    }
-
-    //TODO fix markers
-    @Override
-    public void onLocationChanged(Location location) {
-        mLastLocation = location;
-
-        //remove previous current location Marker
-        if (marker != null){
-            marker.remove();
-        }
-
-        double dLatitude = mLastLocation.getLatitude();
-        double dLongitude = mLastLocation.getLongitude();
-        marker = mMap.addMarker(new MarkerOptions().position(new LatLng(dLatitude, dLongitude))
-                .title("My Location").icon(BitmapDescriptorFactory
-                        .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-        //marker.setVisible(false);
-        //Marker visibility used for debugging purposes
-
-
-        if(circle!= null){
-            circle.remove();
-        }
-        circle = mMap.addCircle(new CircleOptions()
-                .center(marker.getPosition())
-                .radius(5)
-                .strokeColor(Color.RED)
-                .fillColor(Color.TRANSPARENT));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(dLatitude, dLongitude), 8));
-
-    }
-    private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-    }
-
-    public static boolean isLocationEnabled(Context context) {
-        int locationMode = 0;
-        String locationProviders;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            try {
-                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
-
-            } catch (Settings.SettingNotFoundException e) {
-                e.printStackTrace();
-                return false;
-            }
-
-            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
-
-        }else{
-            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-            return !TextUtils.isEmpty(locationProviders);
-        }
-
-
     }
 
 

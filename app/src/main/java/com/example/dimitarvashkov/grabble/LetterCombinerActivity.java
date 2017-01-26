@@ -3,10 +3,8 @@ package com.example.dimitarvashkov.grabble;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -15,16 +13,13 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 
 public class LetterCombinerActivity extends AppCompatActivity {
@@ -39,7 +34,6 @@ public class LetterCombinerActivity extends AppCompatActivity {
     private ArrayList<String> bucket;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,16 +42,16 @@ public class LetterCombinerActivity extends AppCompatActivity {
         // We need an Editor object to make preference changes.
         // All objects are from android.context.Context
 
-            if(DataHolder.getInstance().getLetters() == null){
-                bucket = new ArrayList<>();
-            }else {
-                bucket = DataHolder.getInstance().getLetters();
-            }
+        if (DataHolder.getInstance().getLetters() == null) {
+            bucket = new ArrayList<>();
+        } else {
+            bucket = DataHolder.getInstance().getLetters();
+        }
 
 
-            gridView = (GridView) findViewById(R.id.letterStorage);
-            letterAdapter = new LetterAdapter(this, bucket);
-            gridView.setAdapter(letterAdapter);
+        gridView = (GridView) findViewById(R.id.letterStorage);
+        letterAdapter = new LetterAdapter(this, bucket);
+        gridView.setAdapter(letterAdapter);
 
 
         Button mapButton = (Button) findViewById(R.id.mapButton);
@@ -88,11 +82,10 @@ public class LetterCombinerActivity extends AppCompatActivity {
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(checkWord(wordEditText)){
+                if (checkWord(wordEditText)) {
                     submitButton.setBackgroundColor(Color.GREEN);
                     wordEditText.getText().clear();
-                }
-                else{
+                } else {
                     submitButton.setBackgroundColor(Color.RED);
                     wordEditText.setTextColor(Color.RED);
                 }
@@ -112,53 +105,53 @@ public class LetterCombinerActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
-        SharedPreferences sharedPrefs = getSharedPreferences("Sup",0);
+        SharedPreferences sharedPrefs = getSharedPreferences("Sup", 0);
         SharedPreferences.Editor editor = sharedPrefs.edit();
         Gson gson = new Gson();
         String json = gson.toJson(DataHolder.getInstance().getLetters());
 
         editor.putString("Letters", json);
-        editor.putInt("Words",DataHolder.getInstance().getWordsCreated());
-        editor.putInt("Score",DataHolder.getInstance().getScore());
+        editor.putInt("Words", DataHolder.getInstance().getWordsCreated());
+        editor.putInt("Score", DataHolder.getInstance().getScore());
 
         editor.commit();
 
 
     }
 
-    public boolean checkWord(EditText wordEditText){
+    public boolean checkWord(EditText wordEditText) {
         String word = wordEditText.getText().toString().toUpperCase();
-        ArrayList<String> letters =  DataHolder.getInstance().getLetters();
+        ArrayList<String> letters = DataHolder.getInstance().getLetters();
 
-        Toast.makeText(this,Integer.toString(letters.size()),Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, Integer.toString(letters.size()), Toast.LENGTH_SHORT).show();
         boolean hasLetters = true;
 
-        for(int i=0; i<word.length();i++){
-            if(!letters.contains(Character.toString(word.charAt(i)))){
+        for (int i = 0; i < word.length(); i++) {
+            if (!letters.contains(Character.toString(word.charAt(i)))) {
                 hasLetters = false;
             }
         }
 
-        if(!hasLetters){
-            Toast.makeText(this,"No letters",Toast.LENGTH_SHORT).show();
+        if (!hasLetters) {
+            Toast.makeText(this, "No letters", Toast.LENGTH_SHORT).show();
         }
-        if(word.length() != 7){
-            Toast.makeText(this,"Not 7 letters long",Toast.LENGTH_SHORT).show();
+        if (word.length() != 7) {
+            Toast.makeText(this, "Not 7 letters long", Toast.LENGTH_SHORT).show();
         }
-        if(!dictionary.contains(word)){
-            Toast.makeText(this,"Word not in dictionary",Toast.LENGTH_SHORT).show();
+        if (!dictionary.contains(word)) {
+            Toast.makeText(this, "Word not in dictionary", Toast.LENGTH_SHORT).show();
 
         }
 
         //TODO count letter score
-        HashMap<String,Integer> values = DataHolder.getInstance().getValues();
+        HashMap<String, Integer> values = DataHolder.getInstance().getValues();
 
 
-        if (hasLetters && word.length() == 7 && dictionary.contains(word)){
-            for(int i=0; i<word.length();i++){
+        if (hasLetters && word.length() == 7 && dictionary.contains(word)) {
+            for (int i = 0; i < word.length(); i++) {
                 String letter = Character.toString(word.charAt(i));
 
-                if (values.containsKey(letter)){
+                if (values.containsKey(letter)) {
                     int number = values.get(letter);
                     DataHolder.getInstance().addToScore(number);
                 }
@@ -169,7 +162,7 @@ public class LetterCombinerActivity extends AppCompatActivity {
 
 
             DataHolder.getInstance().createdWords(1);
-            Toast.makeText(this,Integer.toString(DataHolder.getInstance().getScore()),Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, Integer.toString(DataHolder.getInstance().getScore()), Toast.LENGTH_SHORT).show();
             return true;
         }
 
@@ -178,13 +171,13 @@ public class LetterCombinerActivity extends AppCompatActivity {
     }
 
     //TODO createDictionary in the background
-    public ArrayList<String> createDictionary(){
+    public ArrayList<String> createDictionary() {
         dictionary = new ArrayList<>();
         input = getResources().openRawResource(R.raw.grabble);
         reader = new BufferedReader(new InputStreamReader(input));
         try {
             String fileLine;
-            while((fileLine =reader.readLine()) != null){
+            while ((fileLine = reader.readLine()) != null) {
                 dictionary.add(fileLine.toUpperCase());
             }
 
@@ -201,7 +194,6 @@ public class LetterCombinerActivity extends AppCompatActivity {
         return dictionary;
 
     }
-
 
 
 }

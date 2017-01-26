@@ -6,36 +6,34 @@
     android:layout_height="match_parent"
     android:background="@color/tan_background"
     android:orientation="vertical"
-    tools:context="com.example.dimitarvashkov.grabble.MainActivity"
-    android:weightSum="1">
+    android:weightSum="1"
+    tools:context="com.example.dimitarvashkov.grabble.MainActivity">
 
 
     <TextView
-        android:layout_margin="30dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Welcome to GRABBLE!"
+        android:layout_margin="30dp"
         android:lines="2"
+        android:text="Welcome to GRABBLE!"
         android:textAlignment="center"
-        android:textSize="50dp"
-        />
+        android:textSize="50dp" />
 
     <android.support.design.widget.FloatingActionButton
+        android:id="@+id/start_button"
         android:layout_width="80dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_margin="20dp"
-        android:src="@android:drawable/btn_star"
         android:layout_weight="0.14"
-        android:id="@+id/start_button"/>
+        android:src="@android:drawable/btn_star" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:text="Press button to start!"
-        android:textSize="25dp"
-        android:layout_gravity="center_horizontal"/>
-
+        android:textSize="25dp" />
 
 
 </LinearLayout>

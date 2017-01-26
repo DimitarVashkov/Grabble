@@ -1,40 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/tan_background"
+    android:orientation="vertical"
     android:weightSum="1">
 
     <TextView
-        android:padding="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:padding="10dp"
         android:text="Points collected:"
-        android:textSize="40dp"
         android:textAllCaps="true"
-        android:textStyle="bold"
-        />
+        android:textSize="40dp"
+        android:textStyle="bold" />
 
     <TextView
 
-        android:layout_marginLeft="20dp"
-        android:layout_marginBottom="20dp"
+        android:id="@+id/totalPoints"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="40dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="20dp"
         android:textAllCaps="true"
-        android:id="@+id/totalPoints"
-        android:layout_gravity="center_horizontal"/>
+        android:textSize="40dp" />
 
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
         android:orientation="horizontal"
-        android:padding="20dp"
-        android:layout_marginTop="25dp">
+        android:padding="20dp">
 
         <TextView
 
@@ -42,33 +42,34 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Words created:"
-            android:textSize="35dp"/>
+            android:textSize="35dp" />
 
         <TextView
+            android:id="@+id/wordsCreated"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAllCaps="true"
             android:paddingLeft="20dp"
             android:text="0"
-            android:textStyle="bold"
+            android:textAllCaps="true"
             android:textSize="40dp"
-            android:id="@+id/wordsCreated"/>
+            android:textStyle="bold" />
     </LinearLayout>
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_margin="20dp"
         android:layout_marginTop="15dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:text="You've been playing the game since:"
-        android:textSize="30dp"/>
+        android:textSize="30dp" />
+
     <TextView
-        android:layout_marginLeft="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
         android:text="10th of November, 2016 "
         android:textSize="30dp"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
 
 </LinearLayout>

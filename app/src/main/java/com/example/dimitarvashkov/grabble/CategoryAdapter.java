@@ -13,7 +13,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 public class CategoryAdapter extends FragmentPagerAdapter {
 
     /**
-     * Context of the app
+     * Adapter for the 4 fragments
      */
     private Context mContext;
 

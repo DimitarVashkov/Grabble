@@ -22,6 +22,8 @@ public class MainActivity extends AppCompatActivity {
         // Set the content of the activity to use the activity_main.xml layout file
         setContentView(R.layout.activity_main);
 
+        //Get all the stored information from Shared Preferences
+
         SharedPreferences sharedPrefs = getSharedPreferences("Sup", 0);
         Gson gson = new Gson();
         String json = sharedPrefs.getString("Letters", null);
@@ -32,10 +34,11 @@ public class MainActivity extends AppCompatActivity {
 
         DataHolder.getInstance().insertLetterSet(bucket);
 
-        DataHolder.getInstance().createdWords(sharedPrefs.getInt("Words", 0));
+        DataHolder.getInstance().incrementCreatedWords(sharedPrefs.getInt("Words", 0));
 
         DataHolder.getInstance().addToScore(sharedPrefs.getInt("Score", 0));
 
+        //------------------------------------------
 
         FloatingActionButton start = (FloatingActionButton) findViewById(R.id.start_button);
         start.setOnClickListener(new View.OnClickListener() {

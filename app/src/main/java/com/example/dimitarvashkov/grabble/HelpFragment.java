@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 
 public class HelpFragment extends Fragment {
+    //Contains only text
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

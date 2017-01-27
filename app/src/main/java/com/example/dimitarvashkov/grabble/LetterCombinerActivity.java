@@ -39,9 +39,7 @@ public class LetterCombinerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_letter_combiner);
 
-        // We need an Editor object to make preference changes.
-        // All objects are from android.context.Context
-
+        //Get letters and show them in a gridView
         if (DataHolder.getInstance().getLetters() == null) {
             bucket = new ArrayList<>();
         } else {
@@ -78,6 +76,7 @@ public class LetterCombinerActivity extends AppCompatActivity {
         final EditText wordEditText = (EditText) findViewById(R.id.wordCombiner);
 
 
+        //Triggers word check
         final Button submitButton = (Button) findViewById(R.id.submit);
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -105,6 +104,7 @@ public class LetterCombinerActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
+        //Save information from DataHolder into SharedPreferences
         SharedPreferences sharedPrefs = getSharedPreferences("Sup", 0);
         SharedPreferences.Editor editor = sharedPrefs.edit();
         Gson gson = new Gson();
@@ -126,12 +126,14 @@ public class LetterCombinerActivity extends AppCompatActivity {
         Toast.makeText(this, Integer.toString(letters.size()), Toast.LENGTH_SHORT).show();
         boolean hasLetters = true;
 
+        //Checks if the user has all the letters in the typed word
         for (int i = 0; i < word.length(); i++) {
             if (!letters.contains(Character.toString(word.charAt(i)))) {
                 hasLetters = false;
             }
         }
 
+        //Shows the user why his word wasn't accepted
         if (!hasLetters) {
             Toast.makeText(this, "No letters", Toast.LENGTH_SHORT).show();
         }
@@ -143,7 +145,7 @@ public class LetterCombinerActivity extends AppCompatActivity {
 
         }
 
-        //TODO count letter score
+        //Get values of the letters
         HashMap<String, Integer> values = DataHolder.getInstance().getValues();
 
 
@@ -151,17 +153,18 @@ public class LetterCombinerActivity extends AppCompatActivity {
             for (int i = 0; i < word.length(); i++) {
                 String letter = Character.toString(word.charAt(i));
 
+                //Count letter value
                 if (values.containsKey(letter)) {
                     int number = values.get(letter);
                     DataHolder.getInstance().addToScore(number);
                 }
-
-                DataHolder.getInstance().removeLetter(letter);
+                //Remove the letters used
+                DataHolder.getInstance().removeLetters(letter);
 
             }
 
-
-            DataHolder.getInstance().createdWords(1);
+            //Increase the number of created words in DataHolder
+            DataHolder.getInstance().incrementCreatedWords(1);
             Toast.makeText(this, Integer.toString(DataHolder.getInstance().getScore()), Toast.LENGTH_SHORT).show();
             return true;
         }
@@ -170,7 +173,7 @@ public class LetterCombinerActivity extends AppCompatActivity {
         return false;
     }
 
-    //TODO createDictionary in the background
+    //Take information from grabble.txt and store in ArrayList
     public ArrayList<String> createDictionary() {
         dictionary = new ArrayList<>();
         input = getResources().openRawResource(R.raw.grabble);
@@ -180,17 +183,12 @@ public class LetterCombinerActivity extends AppCompatActivity {
             while ((fileLine = reader.readLine()) != null) {
                 dictionary.add(fileLine.toUpperCase());
             }
-
             reader.close();
             input.close();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //Log.d("Dictionary",Integer.toString(dictionary.size()));
-        //Log.d("Dictionary",dictionary.get(1));
-        //Log.d("Dictionary",dictionary.get(1000));
-        //Log.d("Dictionary",dictionary.get(15000));
         return dictionary;
 
     }

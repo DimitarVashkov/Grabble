@@ -8,12 +8,16 @@ import java.util.HashMap;
  */
 
 public class DataHolder {
+    /**
+     * Singleton class for storing all the shared information.
+     */
     private static final DataHolder holder = new DataHolder();
     private ArrayList<String> letters;
     private int score;
     private int wordsCreated;
     private boolean vibrate = false;
     private HashMap<String, Integer> values = new HashMap<>();
+    private boolean powerUser = false;
 
     public static DataHolder getInstance() {
         return holder;
@@ -27,7 +31,17 @@ public class DataHolder {
         letters.add(letter);
     }
 
-    public void removeLetter(String... bunchOfLetters) {
+    public ArrayList<String> getLetters() {
+        return letters;
+    }
+
+    public void removeALetter() {
+        if (letters.size() > 10) {
+            letters.remove(0);
+        }
+    }
+
+    public void removeLetters(String... bunchOfLetters) {
         for (String i : bunchOfLetters) {
             letters.remove(i);
         }
@@ -64,9 +78,6 @@ public class DataHolder {
         return values;
     }
 
-    public ArrayList<String> getLetters() {
-        return letters;
-    }
 
     public int getScore() {
         return score;
@@ -76,7 +87,7 @@ public class DataHolder {
         score += i;
     }
 
-    public void createdWords(int i) {
+    public void incrementCreatedWords(int i) {
         wordsCreated += i;
     }
 
@@ -96,10 +107,12 @@ public class DataHolder {
         vibrate = b;
     }
 
-    public void removeALetter() {
-        if (letters.size() > 10) {
-            letters.remove(0);
-        }
+    public void setPowerUser(){
+        powerUser = true;
+    }
+
+    public boolean getPowerUser(){
+        return powerUser;
     }
 
 }

@@ -37,7 +37,9 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.kml.KmlContainer;
 import com.google.maps.android.kml.KmlLayer;
+import com.google.maps.android.kml.KmlPlacemark;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -58,7 +60,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
     private Marker marker;
-    private Set<String> markerIDs = new HashSet<>();
+    //private Set<String> markerIDs = new HashSet<>();
     private Circle circle;
 
     public static boolean isLocationEnabled(Context context) {
@@ -205,6 +207,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    //Retrieve KMl file depending on the day of play
     private void retrieveFileFromUrl() {
         Calendar calendar = Calendar.getInstance();
         int day = calendar.get(Calendar.DAY_OF_WEEK);
@@ -240,34 +243,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    //TODO store letters efficiently, fix buttons
     @Override
     public boolean onMarkerClick(final Marker marker) {
 
-        //marker.showInfoWindow();
-        //Letter is contained in the Snippet attribute
-
+        //Calculate distance between user and marker
         float[] distance = new float[2];
-
         Location.distanceBetween(marker.getPosition().latitude, marker.getPosition().longitude,
                 circle.getCenter().latitude, circle.getCenter().longitude, distance);
 
         if (distance[0] > circle.getRadius()) {
+           //If user not in range, show marker information and (optional) vibrate
             marker.showInfoWindow();
-            Toast.makeText(getBaseContext(), "Get closer to the Marker Location", Toast.LENGTH_LONG).show();
+            Toast.makeText(getBaseContext(), "Get closer!", Toast.LENGTH_SHORT).show();
             if (DataHolder.getInstance().getVibrate()) {
                 Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
                 v.vibrate(500);
             }
 
         } else {
+            //Add letter to DataHolder
             String markerLetter = (String) marker.getSnippet();
-            //Letter letter = Letter.createLetter(markerLetter);
-            //bucket.add(markerLetter);
             DataHolder.getInstance().addLetter(markerLetter.toUpperCase());
-            //TODO Collect marker IDS
-            String markerID = (String) marker.getId();
-            markerIDs.add(markerID);
+
+
+            //I tried storing markerIDs but my parsing is using KMLLayer
+            //String markerID = (String) marker.getId();
+            //markerIDs.add(markerID);
 
             marker.remove();
             Toast.makeText(getBaseContext(), "Letter collected!", Toast.LENGTH_LONG).show();
@@ -278,7 +279,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     protected synchronized void buildGoogleApiClient() {
-        //Toast.makeText(this, "buildGoogleApiClient", Toast.LENGTH_SHORT).show();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -288,14 +288,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onConnected(Bundle bundle) {
-        //Toast.makeText(this,"onConnected", Toast.LENGTH_SHORT).show();
-
+        //Make location updates, check for location services
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(1000);
         mLocationRequest.setFastestInterval(1000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
-        //mLocationRequest.setSmallestDisplacement(0.1F);
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
@@ -314,7 +312,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    //TODO fix markers
     @Override
     public void onLocationChanged(Location location) {
         mLastLocation = location;
@@ -324,6 +321,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             marker.remove();
         }
 
+        //Get location coordinates and place a marker
         double dLatitude = mLastLocation.getLatitude();
         double dLongitude = mLastLocation.getLongitude();
         marker = mMap.addMarker(new MarkerOptions().position(new LatLng(dLatitude, dLongitude))
@@ -336,15 +334,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (circle != null) {
             circle.remove();
         }
+
+        //Add user range depending on powerUser status
+        if (DataHolder.getInstance().getPowerUser()){
         circle = mMap.addCircle(new CircleOptions()
                 .center(marker.getPosition())
-                .radius(6)
+                .radius(15)
                 .strokeColor(Color.RED)
-                .fillColor(Color.TRANSPARENT));
+                .fillColor(Color.TRANSPARENT));}
+        else {
+            circle = mMap.addCircle(new CircleOptions()
+                    .center(marker.getPosition())
+                    .radius(10)
+                    .strokeColor(Color.RED)
+                    .fillColor(Color.TRANSPARENT));
+        }
+        //Move camera to location
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(dLatitude, dLongitude), 8));
 
     }
 
+    //Check for network
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -352,6 +362,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
+
+    /**
+     * Download KML layer and apply to map
+     */
     private class DownloadKmlFile extends AsyncTask<String, Void, byte[]> {
         private final String mUrl;
 
@@ -378,7 +392,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         protected void onPostExecute(byte[] byteArr) {
             try {
-
+                //Really easy to apply the markers
+                //PROBLEM: Can't remove the markers using a KMLLayer
                 KmlLayer kmlLayer = new KmlLayer(mMap, new ByteArrayInputStream(byteArr),
                         getApplicationContext());
                 kmlLayer.addLayerToMap();

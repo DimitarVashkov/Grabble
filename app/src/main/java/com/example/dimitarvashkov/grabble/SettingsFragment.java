@@ -15,6 +15,8 @@ public class SettingsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.settings, container, false);
 
+
+        //Switch for vibration, information stored in DataHolder
         final Switch vibrateSwitch = (Switch) rootView.findViewById(R.id.vibrate);
         vibrateSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override

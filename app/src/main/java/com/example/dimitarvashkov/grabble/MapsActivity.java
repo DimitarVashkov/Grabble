@@ -37,9 +37,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.maps.android.kml.KmlContainer;
 import com.google.maps.android.kml.KmlLayer;
-import com.google.maps.android.kml.KmlPlacemark;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -49,8 +47,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Set;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
@@ -252,7 +248,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 circle.getCenter().latitude, circle.getCenter().longitude, distance);
 
         if (distance[0] > circle.getRadius()) {
-           //If user not in range, show marker information and (optional) vibrate
+            //If user not in range, show marker information and (optional) vibrate
             marker.showInfoWindow();
             Toast.makeText(getBaseContext(), "Get closer!", Toast.LENGTH_SHORT).show();
             if (DataHolder.getInstance().getVibrate()) {
@@ -336,13 +332,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         //Add user range depending on powerUser status
-        if (DataHolder.getInstance().getPowerUser()){
-        circle = mMap.addCircle(new CircleOptions()
-                .center(marker.getPosition())
-                .radius(15)
-                .strokeColor(Color.RED)
-                .fillColor(Color.TRANSPARENT));}
-        else {
+        if (DataHolder.getInstance().getPowerUser()) {
+            circle = mMap.addCircle(new CircleOptions()
+                    .center(marker.getPosition())
+                    .radius(15)
+                    .strokeColor(Color.RED)
+                    .fillColor(Color.TRANSPARENT));
+        } else {
             circle = mMap.addCircle(new CircleOptions()
                     .center(marker.getPosition())
                     .radius(10)

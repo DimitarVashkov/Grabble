@@ -107,11 +107,11 @@ public class DataHolder {
         vibrate = b;
     }
 
-    public void setPowerUser(){
+    public void setPowerUser() {
         powerUser = true;
     }
 
-    public boolean getPowerUser(){
+    public boolean getPowerUser() {
         return powerUser;
     }
 

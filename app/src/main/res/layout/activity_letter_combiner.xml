@@ -66,10 +66,11 @@
         <GridView
             android:id="@+id/letterStorage"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="200dp"
             android:layout_gravity="center"
             android:gravity="center"
-            android:numColumns="6" />
+            android:numColumns="6"
+            android:scrollbars="vertical"/>
 
 
     </LinearLayout>

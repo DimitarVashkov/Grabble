@@ -23,10 +23,10 @@ public class ProfileFragment extends Fragment {
         TextView powerUser = (TextView) rootView.findViewById(R.id.powerUser);
 
         //Level up the user after 1000 points; The user can't revert back to normal user.
-        if(DataHolder.getInstance().getScore() > 1000){
+        if (DataHolder.getInstance().getScore() > 1000) {
             DataHolder.getInstance().setPowerUser();
             powerUser.setText("You're a power user! Search radius increased!");
-        }else{
+        } else {
             powerUser.setText("Nope! Score 1000 points!");
         }
 

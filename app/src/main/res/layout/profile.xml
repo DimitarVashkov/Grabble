@@ -64,12 +64,12 @@
         android:textSize="35dp" />
 
     <TextView
+        android:id="@+id/powerUser"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
         android:textSize="30dp"
-        android:textStyle="bold"
-        android:id="@+id/powerUser"/>
+        android:textStyle="bold" />
 
 
 </LinearLayout>
